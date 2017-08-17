@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using YoutubeSearcher.API;
+using YoutubeSearcher.Web.Models;
+using System.IO;
 
 namespace YoutubeSearcher.Web.Controllers
 {
@@ -13,18 +17,17 @@ namespace YoutubeSearcher.Web.Controllers
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult Search(string search, DateTime? from, DateTime? to, string nextPageToken)
         {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
+            var searcher = new VideoSearcher(ConfigurationManager.AppSettings["YoutubeKey"]);
+            var searchResults = searcher.Search(search, from, to, nextPageToken);
+            return Json(searchResults, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Contact()
+        [HttpPost]
+        public void TrackLinkClick(string url)
         {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
+            System.IO.File.AppendAllText(Server.MapPath("~/LinkTracking") + "/tracks.txt", url + "\r\n");
         }
     }
 }
